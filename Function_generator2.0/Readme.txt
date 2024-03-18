@@ -1,6 +1,6 @@
 # Function Generator for 8051 Microcontroller
 
-## Overview
+##Overview
 This project contains assembly code for the 8051 microcontroller to act as a function generator capable of creating the following signals:
 - Square wave
 - Sawtooth wave
