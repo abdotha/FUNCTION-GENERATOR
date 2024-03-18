@@ -25,17 +25,11 @@ This project can be used to learn about:
 3. Assemble and upload the code to the 8051 microcontroller.
 4. Connect the microcontroller to a waveform viewer to see the output.
 
-## Code Structure
-- `main.asm`: Contains the main assembly code for the function generator.
-- `keypad.asm`: Manages the keypad interface.
-- `lcd.asm`: Handles the LCD display operations.
-- `dac.asm`: Controls the digital to analog conversion.
 
 ## Contributing
 Contributions to this project are welcome. Please ensure to update tests as appropriate.
 
-## License
-Distributed under the MIT License. See `LICENSE` for more information.
+
 
 ## Acknowledgments
 - [Electronics Hub](https://www.electronicshub.org/8051-microcontroller-assembly-language-programming/) for providing foundational knowledge on 8051 assembly language programming.
