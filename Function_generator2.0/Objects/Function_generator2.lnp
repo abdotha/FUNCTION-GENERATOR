@@ -1,0 +1,4 @@
+".\Objects\STARTUP.obj",
+".\Objects\Test_fun.obj" 
+TO ".\Objects\Function_generator2.0" 
+PRINT(".\Listings\Function_generator2.m51") RAMSIZE(256) 

@@ -1,0 +1,751 @@
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.7.0
+OBJECT MODULE PLACED IN .\Objects\Test_fun.obj
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE Test_fun.asm SET(SMALL) DEBUG PRINT(.\Listings\Test_fun.lst) OBJECT(.\O
+                      bjects\Test_fun.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00H
+  0021                 2     REMINDER EQU 21H
+  0010                 3     WAVE_SELECT EQU 10H
+  0080                 4     WAVE_OUT EQU P0
+  00B0                 5     KEYPAD EQU P3 
+  00B7                 6     RO1 BIT P3.7 
+  00B6                 7     RO2 BIT P3.6
+  00B5                 8     RO3 BIT P3.5
+  00B4                 9     RO4 BIT P3.4
+  00B0                10     C4 BIT P3.0
+  00B1                11     C3 BIT P3.1
+  00B2                12     C2 BIT P3.2
+  00B3                13     C1 BIT P3.3
+                      14     ;configure port 3,most 4 bits are output to rows least 4 bits are inputs of cloumns
+  0090                15     LCD_PORT EQU P1
+  00A4                16     OSC BIT P2.4
+  00A1                17     RS BIT P2.1
+  00A2                18     E BIT P2.2
+0000 758000           19     MOV WAVE_OUT,#0
+                      20     ;initilize input and outputs
+0003 759000           21     MOV P1, #00H
+0006 C2A1             22     CLR RS
+0008 C2A2             23     CLR E
+000A C2A4             24     CLR OSC
+000C 75B00F           25     MOV KEYPAD, #0FH
+000F                  26     INITIAL:
+000F 515B             27     ACALL LCD_INIT 
+                      28     
+0011 900417           29     MOV DPTR,#FREQ_RANGE_MESG
+0014 12028E           30     LCALL MESG_DESPLAY
+0017                  31     MAIN:
+0017 319E             32     ACALL SELECTION_MSG
+0019 31E0             33     ACALL READ_FREQ
+001B 540F             34     ANL A,#0FH 
+001D F510             35     MOV WAVE_SELECT,A 
+001F 3195             36     ACALL FREQUANCY
+0021 31E0             37     ACALL READ_FREQ             ;READ FIRST DIGIT FREQUANCY [2 KHZ --> 10 KHZ]
+0023 B43061           38     CHECK:CJNE A,#30H,CHECK1           ;CHECK IF WRITE NUM OR OPERATION
+0026 752200           39     MOV 22H,#0
+0029                  40     RETURN1:
+0029 31D7             41     ACALL CLEAR_COMAND
+002B 5181             42     ACALL LCD_DATA                   ;SHOW FRIST OPERAND DIGIT 1
+002D 5152             43     ACALL DELAY
+002F 540F             44     ANL A,#0FH             ;CONVERT FROM ASCII TO DECIMAL
+0031 FB               45     MOV R3,A                ;STORE 1ST DIGIT IN R3
+                      46     
+0032 31E0             47     ACALL READ_FREQ             ;READ DIGIT 2
+0034 B4305B           48     CJNE A,#30H,CHECK2
+0037 752300           49     MOV 23H,#0
+003A                  50     RETURN2:
+003A 31D7             51     ACALL CLEAR_COMAND
+                      52     
+003C B43D03           53     CJNE A,#'=',CONT
+003F 0200A8           54     LJMP ONE
+0042                  55     CONT:
+0042 5181             56     ACALL LCD_DATA                 ;SHOW DIGIT 2
+0044 5152             57     ACALL DELAY
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     2
+
+0046 540F             58     ANL A,#0FH             ;CONVERT FROM ASCII TO DECIMAL
+0048 FC               59     MOV R4,A                    ;SAVE 2ND DIGIT IN R4
+                      60     
+0049 31E0             61     ACALL READ_FREQ               ;READ DIGIT 3
+004B B4304F           62     CJNE A,#30H,CHECK3
+004E 752400           63     MOV 24H,#0
+0051                  64     RETURN3:
+0051 31D7             65     ACALL CLEAR_COMAND
+0053 B43D03           66     CJNE A,#'=',CONT2
+0056 0200B1           67     LJMP TWO
+0059                  68     CONT2:
+0059 5181             69     ACALL LCD_DATA
+005B 5152             70     ACALL DELAY
+005D 540F             71     ANL A,#0FH             ;CONVERT FROM ASCII TO DECIMAL
+005F FD               72     MOV R5,A                 ;SAVE 3RD DIGIT IN R5
+                      73     
+0060 31E0             74     ACALL READ_FREQ              ;READ '='
+0062 B43D1F           75     CJNE A,#'=',OVER1          ;IF NOT EQUAL DISPLAY TOO MUCH           
+0065                  76     RESULT:
+0065 E522             77     MOV A,22H
+0067 B40050           78     CJNE A,#0,ERROR
+006A E523             79     MOV A,23H
+006C B4004B           80     CJNE A,#0,ERROR
+006F E524             81     MOV A,24H
+0071 B40046           82     CJNE A,#0,ERROR
+0074                  83     SKIP:
+0074 1200DE           84     LCALL KHZ
+0077 11F2             85     ACALL FREQ
+0079 3109             86     ACALL INITIAL_VALUE
+                      87     
+                      88     ;part 4
+                      89     
+007B                  90     GO2:
+007B E8               91     MOV A,R0
+007C B40103           92     CJNE A,#1,GO3              ;IF 2ND BIT IN DUTY NOT EQUAL 0 OR 5        
+007F 0200BA           93     LJMP ERROR
+0082                  94     GO3:
+                      95     
+0082 3126             96     ACALL OUTPUT
+                      97     
+0084 0200CC           98     OVER1:LJMP OVER
+                      99     
+0087                 100     CHECK1:
+0087 752200          101     MOV 22H,#0
+008A 509D            102     JNC RETURN1
+008C 752205          103     MOV 22H,#5           ;IF WRITE */-+ 
+008F 020029          104     LJMP RETURN1
+0092                 105     CHECK2:
+0092 752300          106     MOV 23H,#0
+0095 50A3            107     JNC RETURN2
+0097 752305          108     MOV 23H,#5
+009A 02003A          109     LJMP RETURN2
+009D                 110     CHECK3:
+009D 752400          111     MOV 24H,#0
+00A0 50AF            112     JNC RETURN3
+00A2 752405          113     MOV 24H,#5
+00A5 020051          114     LJMP RETURN3
+00A8                 115     ONE:
+00A8 EB              116     MOV A,R3
+00A9 FD              117     MOV R5,A
+00AA 7B00            118     MOV R3,#0
+00AC 7C00            119     MOV R4,#0
+00AE 020065          120     LJMP RESULT
+                     121     
+00B1                 122     TWO:
+00B1 EC              123     MOV A,R4
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     3
+
+00B2 FD              124     MOV R5,A
+00B3 EB              125     MOV A,R3
+00B4 FC              126     MOV R4,A
+00B5 7B00            127     MOV R3,#0
+00B7 020065          128     LJMP RESULT
+                     129     
+00BA                 130     ERROR:
+00BA 516E            131     ACALL LCD_CLEAR
+00BC 5152            132     ACALL DELAY
+00BE 90040F          133     MOV DPTR,#ERROR_MESG
+00C1 E4              134     B3:CLR A
+00C2 93              135     MOVC A,@ A + DPTR
+00C3 6020            136     JZ NEW_VALUE
+00C5 5181            137     ACALL LCD_DATA
+00C7 5152            138     ACALL DELAY
+00C9 A3              139     INC DPTR
+00CA 80F5            140     SJMP B3
+                     141      
+                     142      
+00CC                 143     OVER:
+00CC 516E            144     ACALL LCD_CLEAR
+00CE 5152            145     ACALL DELAY
+00D0 900400          146     MOV DPTR,#OVERFLOW
+00D3 E4              147     B1:CLR A
+00D4 93              148     MOVC A,@ A + DPTR
+00D5 600E            149     JZ NEW_VALUE
+00D7 5181            150     ACALL LCD_DATA
+00D9 5152            151     ACALL DELAY
+00DB A3              152     INC DPTR
+00DC 80F5            153     SJMP B1
+                     154     
+00DE                 155     KHZ:
+00DE 90040A          156     MOV DPTR,#MSG2
+00E1 12028E          157     LCALL MESG_DESPLAY
+00E4 22              158     RET 
+00E5                 159     NEW_VALUE:              ;TO ADD NEW VALUE
+00E5 31E0            160     ACALL READ_FREQ            ;READ FIRST DIGIT FREQUANCY [2 KHZ --> 250 KHZ]
+00E7 FB              161     MOV R3,A
+00E8 516E            162     ACALL LCD_CLEAR  
+00EA 5152            163     ACALL DELAY
+00EC 3195            164     ACALL FREQUANCY
+00EE EB              165     MOV A,R3
+00EF 020023          166     LJMP CHECK
+                     167     
+                     168     ;part 2
+                     169     
+00F2                 170     FREQ:               ;CONVERT DIGITS TO DECIMAL
+00F2 75F064          171             MOV B,#100
+00F5 EB              172             MOV A,R3         ;GET 1ST DIGIT 
+00F6 A4              173             MUL AB               ;IF OVER FLOW WILL BE VALUE IN B  
+00F7 FE              174             MOV R6,A
+00F8 E5F0            175             MOV A,B
+00FA B400CF          176             CJNE A,#0,OVER            ;IF NOT EQUAL DISPLAT "TOO MUCH"
+00FD EC              177             MOV A,R4          ;GET 2ND DIGIT   
+00FE 75F00A          178             MOV B,#10
+0101 A4              179             MUL AB
+0102 C3              180             CLR C
+0103 2E              181             ADD A,R6
+0104 40C6            182             JC OVER
+0106 2D              183             ADD A,R5
+0107 FE              184             MOV R6,A          ;SAVE FREQ IN DECIMAL IN R6
+0108 22              185     RET
+                     186     
+0109                 187     INITIAL_VALUE:
+0109 EE              188             MOV A,R6            ;GET DECIMAL FREQ
+010A F5F0            189             MOV B,A
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     4
+
+010C 74FA            190             MOV A,#250
+010E 84              191             DIV AB
+010F 85F021          192             MOV REMINDER,B           
+0112 75F002          193             MOV B,#2
+0115 A4              194             MUL AB
+0116 F8              195             MOV R0,A 
+0117 E521            196             MOV A,REMINDER
+0119 75F002          197             MOV B,#2
+011C A4              198             MUL AB             ;MUL REMINDER IN 2 --> IN THE EQUATION
+011D 8EF0            199             MOV B,R6
+011F 84              200             DIV AB             ;DIV RESULT INTO 2ND OPERAND --> FREQ
+0120 28              201             ADD A,R0 
+0121 F4              202             CPL A
+0122 2404            203             ADD A,#4
+0124 FB              204             MOV R3,A           ;SAVE INITIAL VALUE IN R3
+0125 22              205     RET
+                     206     
+0126                 207     OUTPUT:
+0126 E510            208     MOV A,WAVE_SELECT
+0128 B40120          209     CJNE A,#1,NXT1
+012B 758902          210     MOV TMOD,#00000010B
+012E EB              211     MOV A,R3            ;GET INITIAL VALUE
+012F F58C            212     MOV TH0,A
+0131                 213     SQUARE_LOOP:
+0131 7580FF          214     MOV WAVE_OUT,#255               ;MAKE WAVE HIGH
+                     215     
+0134 D28C            216     SETB TR0                  ;START TIMER
+0136 308DFD          217     HERE1:JNB TF0,HERE1         ;POLLING
+0139 C28C            218     CLR TR0                   ;STOP TIMER
+013B C28D            219     CLR TF0
+                     220     
+013D 758000          221     MOV WAVE_OUT,#0                         ;MAKE WAVE LOW
+                     222     
+0140 D28C            223     SETB TR0
+0142 308DFD          224     HERE2:JNB TF0,HERE2
+0145 C28C            225     CLR TR0
+0147 C28D            226     CLR TF0
+                     227     
+0149 80E6            228     SJMP SQUARE_LOOP
+                     229     
+014B                 230     NXT1:
+014B B4020A          231     CJNE A,#2,SINE_WAVE
+014E 8EF0            232     MOV B,R6
+0150 7400            233     MOV A,#0
+                     234     
+0152                 235     SAWTOOTH_LOOP:
+0152 25F0            236     ADD A,B         ;A=A+B ===> B[INPUT_FREQ]
+0154 F580            237     MOV WAVE_OUT,A  ;WAVE_OUT+=INPUT_FREQ
+0156 80FA            238     SJMP SAWTOOTH_LOOP
+                     239     
+0158                 240     SINE_WAVE:
+0158 B4032A          241     CJNE A,#3,INVALID_MESG
+015B EE              242     MOV A,R6
+015C F8              243     MOV R0,A 
+015D 7D0A            244     MOV R5,#10
+015F                 245     CONT_CALC:
+015F 8DF0            246     MOV B,R5
+0161 B5F016          247     CJNE A,B,ADDRESS_CALC
+                     248     
+0164 8EF0            249     MOV B,R6
+0166 7478            250     MOV A,#120
+0168 84              251     DIV AB
+0169 FA              252     MOV R2,A
+016A F509            253     MOV 9H,A 
+016C                 254     SINE_LOOP:
+016C AA09            255     MOV R2,9H  
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     5
+
+016E 900FA0          256     MOV DPTR,#4000
+0171                 257     LOOP:
+0171 EF              258     MOV A,R7
+0172 93              259     MOVC A,@ A+DPTR
+0173 F580            260     MOV WAVE_OUT,A 
+0175 A3              261     INC DPTR 
+0176 DAF9            262     DJNZ R2,LOOP 
+0178 80F2            263     SJMP SINE_LOOP
+017A                 264     ADDRESS_CALC:
+017A 8DF0            265     MOV B,R5
+017C 7478            266     MOV A,#120
+017E 84              267     DIV AB
+017F 2F              268     ADD A,R7
+0180 FF              269     MOV R7,A 
+0181 EE              270     MOV A,R6 
+0182 1D              271     DEC R5
+0183 80DA            272     SJMP CONT_CALC
+                     273     
+0185                 274     INVALID_MESG:
+0185 12026E          275     LCALL LCD_CLEAR
+0188 90040F          276     MOV DPTR,#ERROR_MESG
+018B 12028E          277     LCALL MESG_DESPLAY
+018E 1201E0          278     LCALL READ_FREQ
+0191 020017          279     LJMP MAIN 
+                     280     
+                     281     ;part one
+0194 22              282     RET
+                     283     
+                     284     ;part 3 
+                     285     
+0195                 286     FREQUANCY:
+0195 516E            287     ACALL LCD_CLEAR
+0197 900425          288     MOV DPTR,#MSG8
+019A 12028E          289     LCALL MESG_DESPLAY
+019D 22              290     RET
+                     291     
+019E                 292     SELECTION_MSG:
+019E 516E            293             ACALL LCD_CLEAR
+01A0 90042B          294             MOV DPTR,#SQUARE
+01A3 12028E          295             LCALL MESG_DESPLAY
+01A6 5152            296             ACALL Delay
+01A8 5152            297             ACALL Delay
+01AA 5152            298             ACALL Delay
+01AC 5152            299             ACALL Delay
+                     300             ;TO KEEP THE SELECTION ON THE SCREEN 
+                     301     
+01AE 516E            302             ACALL LCD_CLEAR
+01B0 900434          303             MOV DPTR,#SAWTOOTH
+01B3 12028E          304             LCALL MESG_DESPLAY
+                     305     
+01B6 5152            306             ACALL Delay
+01B8 5152            307             ACALL Delay
+01BA 5152            308             ACALL Delay
+01BC 5152            309             ACALL Delay
+                     310     
+01BE 516E            311             ACALL LCD_CLEAR
+01C0 90043F          312             MOV DPTR,#SINE
+01C3 12028E          313             LCALL MESG_DESPLAY
+                     314     
+01C6 5152            315             ACALL Delay
+01C8 5152            316             ACALL Delay
+01CA 5152            317             ACALL Delay
+01CC 5152            318             ACALL Delay
+                     319     
+01CE 516E            320             ACALL LCD_CLEAR
+01D0 900446          321             MOV DPTR,#SELECTED
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     6
+
+01D3 12028E          322             LCALL MESG_DESPLAY
+                     323     
+01D6 22              324     RET
+                     325     
+                     326     
+01D7                 327     CLEAR_COMAND:
+01D7 B46305          328                     CJNE A,#'c',CONT1
+01DA 516E            329                     ACALL LCD_CLEAR
+01DC 020017          330                     LJMP MAIN
+01DF                 331     CONT1:
+01DF 22              332     RET
+                     333     
+                     334     
+01E0                 335     READ_FREQ:
+01E0                 336             K1: 
+01E0 C2B7            337                     CLR RO1            ;Ground all columns at first
+01E2 C2B6            338                     CLR RO2 
+01E4 C2B5            339                     CLR RO3
+01E6 C2B4            340                     CLR RO4
+                     341     
+01E8 E5B0            342                     MOV A, KEYPAD                   ; Read keypad inputs
+01EA 540F            343                     ANL A, #0FH                    ;mask left 4 bits, check only right left bits
+01EC B40F02          344                     CJNE A,#00001111B,K2         ;if any zero at any column so there is a press
+                     345                             
+                     346             ;if A equal 0000 1111 so no press, REPEAT AGAIN 
+01EF 80EF            347             Sjmp K1
+                     348             ;if it is a press,make sure this press is real,, debouncing 
+01F1                 349                     K2: 
+01F1 5152            350                             ACALL Delay
+                     351                             ;repeat check again
+01F3 E5B0            352                             MOV A, KEYPAD              ;Read keypad inputs
+01F5 540F            353                             ANL A, #0FH
+01F7 B40F02          354                             CJNE A, #00001111B, check_row            ;if any zero at least 4 bi
+                             ts, a key is pressed
+                     355                             ;go to check which row ?
+                     356                             ;not a real press, go again 
+01FA 80E4            357             SJMP K1
+                     358     
+01FC                 359             check_row: 
+01FC C2B7            360             CLR RO1            ;check first row
+01FE D2B6            361             SETB RO2
+0200 D2B5            362             SETB RO3
+0202 D2B4            363             SETB RO4
+                     364     
+0204 E5B0            365             MOV A, KEYPAD               ;READ VALUE ON PORT
+0206 B47F2A          366             CJNE A,#01111111B, ROW_1      ;if there is a zero on any of the column, there is a 
+                             press in rowl
+                     367             ;if not scan second row
+0209 D2B7            368             SETB RO1           ; check second row
+020B C2B6            369             CLR RO2
+020D D2B5            370             SETB RO3
+020F D2B4            371             SETB RO4
+0211 E5B0            372             MOV A, KEYPAD         ;READ VALUE ON PORT
+0213 B4BF22          373             CJNE A, #10111111B, ROW_2             ;if there is a zero on any of the column, the
+                             re is a press in rowl 
+                     374             ;if not scan third row
+0216 D2B7            375             SETB RO1            ; check third row
+0218 D2B6            376             SETB RO2
+021A C2B5            377             CLR RO3
+021C D2B4            378             SETB RO4
+                     379     
+021E E5B0            380             MOV A, KEYPAD            ;READ VALUE ON PORT
+0220 B4DF1A          381             CJNE A, #11011111B, ROW_3        ;if there is a zero on any of the column ,there is
+                              a press in rowl
+                     382             ;if not scan fourth row
+0223 D2B7            383             SETB RO1
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     7
+
+0225 D2B6            384             SETB RO2          ; check fourth row
+0227 D2B5            385             SETB RO3
+0229 C2B4            386             CLR RO4
+022B E5B0            387             MOV A, KEYPAD              ;READ VALUE ON PORT
+022D B4EF12          388             CJNE A,#11101111B, ROW_4          ;if there is a zero on any of the column, there i
+                             s a press in rowl
+                     389             ;if not repeat again
+0230 0201E0          390             LJMP K1
+                     391     
+0233 900300          392             ROW_1: MOV DPTR,#ROW1            ;access memory at this row but which column
+0236 800F            393                             SJMP FIND
+0238 900304          394             ROW_2: MOV DPTR,#ROW2 
+023B 800A            395                             SJMP FIND
+023D 900308          396             ROW_3: MOV DPTR,#ROW3 
+0240 8005            397                             SJMP FIND
+0242 90030C          398             ROW_4: MOV DPTR,#ROW4 
+0245 8000            399                             SJMP FIND
+                     400                             
+0247 7F04            401             FIND: MOV R7,#4             ; check which bit is zero
+0249 13              402             AGAIN: RRC A
+024A 5003            403             JNC MATCH                 ;if lsb is zero so it is in first column
+024C A3              404             INC DPTR                  ;if not increment next location
+024D 80FA            405             SJMP AGAIN
+                     406     
+024F E4              407             MATCH: CLR A
+0250 93              408             MOVC A,@ A+DPTR             ; key read now in accumlator
+0251 22              409             RET
+                     410     
+0252                 411     Delay:
+0252 7FFF            412             MOV R7, #255
+0254 7EFF            413             LL:MOV R6, #255
+0256 DEFE            414             LL2:DJNZ R6, LL2
+0258 DFFA            415             DJNZ R7,LL
+025A 22              416     RET
+                     417     
+                     418     
+                     419     
+                     420     
+                     421      
+                     422     ;LCD CODE
+                     423     
+                     424     
+025B                 425     LCD_INIT: 
+025B 7438            426             MOV A, #38h
+025D 5175            427             ACALL LCD_COMM 
+025F 5152            428             ACALL DELAY 
+0261 740E            429             MOV A, #0EH
+0263 5175            430             ACALL LCD_COMM 
+0265 5152            431             ACALL DELAY
+                     432     
+0267 7401            433             MOV A, #01
+0269 5175            434             ACALL LCD_COMM
+026B 5152            435             ACALL DELAY 
+026D 22              436     RET
+                     437     
+                     438     
+                     439     
+                     440     
+                     441     
+026E                 442     LCD_CLEAR:
+026E 7401            443         MOV A, #01
+0270 5175            444         ACALL LCD_COMM
+0272 5152            445         ACALL DELAY
+0274 22              446     RET  
+                     447     
+                     448             ;clear the screen
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     8
+
+0275 F590            449             LCD_COMM: MOV LCD_PORT, A       ;write command to D0-D7
+0277 C2A1            450             CLR RS
+0279 D2A2            451             SETB E                    ;RS=0 for sending commands give a pulse of enable to LCD
+027B 00              452             NOP
+027C 00              453             NOP
+027D 00              454             NOP
+027E C2A2            455             CLR E
+0280 22              456     RET
+                     457     
+0281                 458     LCD_DATA:
+0281 F590            459             MOV LCD_PORT, A
+0283 D2A1            460             SETB RS
+0285 D2A2            461             SETB E
+0287 00              462             NOP
+0288 00              463             NOP
+0289 00              464             NOP
+028A 00              465             NOP
+028B C2A2            466             CLR E
+028D 22              467     RET
+                     468     
+028E                 469     MESG_DESPLAY:
+028E E4              470             CONT_DIS:CLR A
+028F 93              471                     MOVC A,@ A + DPTR
+0290 6007            472                     JZ STOP_DIS
+0292 5181            473                     ACALL LCD_DATA
+0294 5152            474                     ACALL DELAY
+0296 A3              475                     INC DPTR
+0297 80F5            476                     SJMP CONT_DIS 
+0299                 477                     STOP_DIS:
+0299 22              478     RET 
+                     479     
+                     480                         ;Delay subroutine
+                     481     
+0300                 482     ORG 300H
+0300 2D333231        483             ROW1:DB '-', '3', '2','1' 
+0304 2A363534        484             ROW2:DB '*', '6', '5','4' 
+0308 2F393837        485             ROW3:DB '/', '9', '8','7'
+030C 2B3D3063        486             ROW4:DB '+', '=', '0','c'
+                     487                             
+                     488                     
+                     489                             
+0400                 490     ORG 400H
+0400 20544F4F        491             OVERFLOW:DB " TOO MUCH",0
+0404 204D5543                
+0408 4800                    
+040A 204B485A        492             MSG2:DB " KHZ",0
+040E 00                      
+040F 494E5641        493             ERROR_MESG:DB "INVALID",0
+0413 4C494400                
+0417 324B485A        494             FREQ_RANGE_MESG:DB "2KHZ TO 10KHZ",0
+041B 20544F20                
+041F 31304B48                
+0423 5A00                    
+0425 46524551        495             MSG8:DB "FREQ=",0
+0429 3D00                    
+042B 312D5351        496             SQUARE:DB "1-SQUARE",0
+042F 55415245                
+0433 00                      
+0434 322D5341        497             SAWTOOTH:DB"2-SAWTOOTH",0
+0438 57544F4F                
+043C 544800                  
+043F 332D5349        498             SINE:DB"3-SINE",0
+0443 4E4500                  
+0446 53454C45        499             SELECTED:DB "SELECTED= ",0 
+044A 43544544                
+044E 3D2000                  
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE     9
+
+0FA0                 500     ORG 4000
+0FA0 80BFEEFF        501         SINE_10K: DB 128, 191, 238, 255, 238, 191, 128, 64, 17, 0, 17, 64
+0FA4 EEBF8040                
+0FA8 11001140                
+0FAC                 502     ORG 4012
+0FAC 80BBE8FE        503         SINE_9K:DB 128, 187, 232, 254, 247, 212, 158, 97, 43, 8, 1, 23, 68
+0FB0 F7D49E61                
+0FB4 2B080117                
+0FB8 44                      
+0FB9                 504     ORG 4025
+0FB9 80B3DEF9        505         SINE_8K:DB 128, 179, 222, 249, 254, 238, 202, 154, 101, 53, 17, 1, 6, 33, 76
+0FBD FEEECA9A                
+0FC1 65351101                
+0FC5 06214C                  
+0FC8                 506     ORG 4040
+0FC8 80AED5F2        507         SINE_7K: DB 128, 174, 213, 242, 254, 250, 229, 195, 151, 104, 60, 26, 5, 1, 13, 42, 81
+0FCC FEFAE5C3                
+0FD0 97683C1A                
+0FD4 05010D2A                
+0FD8 51                      
+0FD9                 508     ORG 4057
+0FD9 80A7CAE7        509         SINE_6K:DB 128, 167, 202, 231, 249, 255, 249, 231, 202, 167, 128, 88, 53, 24, 6, 0, 6, 
+                             24, 53, 88
+0FDD F9FFF9E7                
+0FE1 CAA78058                
+0FE5 35180600                
+0FE9 06183558                
+0FED                 510     ORG 4077
+0FED 80A0BFDA        511         SINE_5K:DB 128, 160, 191, 218, 238, 251, 255, 251, 238, 218, 191, 160, 128, 95, 64, 37,
+                              17, 4, 0, 4, 17, 37, 64, 95
+0FF1 EEFBFFFB                
+0FF5 EEDABFA0                
+0FF9 805F4025                
+0FFD 11040004                
+1001 1125405F                
+1005                 512     ORG 4101  
+1005 809AB3CA        513             SINE_4K: DB 128, 154, 179, 202, 222, 238, 249, 254, 254, 249, 238, 222, 202, 179, 1
+                             54, 128, 101, 76, 53, 33, 17, 6, 1, 1, 6, 17, 33, 53, 76, 101
+1009 DEEEF9FE                
+100D FEF9EEDE                
+1011 CAB39A80                
+1015 654C3521                
+1019 11060101                
+101D 06112135                
+1021 4C65                    
+1023                 514     ORG 4131
+1023 8093A7B9        515             SINE_3K:DB 128, 147, 167, 185, 202, 218, 231, 241, 249, 253, 255, 253, 249, 241, 23
+                             1, 218, 202, 185, 167, 147, 128, 108, 88, 70, 53, 37, 24, 14, 6, 2, 0, 2, 6, 14, 24, 37, 53, 70, 88, 108
+1027 CADAE7F1                
+102B F9FDFFFD                
+102F F9F1E7DA                
+1033 CAB9A793                
+1037 806C5846                
+103B 3525180E                
+103F 06020002                
+1043 060E1825                
+1047 3546586C                
+104B                 516     ORG 4171
+104B 808D9AA7        517             SINE_2K:DB 128, 141, 154, 167, 179, 191, 202, 213, 222, 231, 238, 244, 249, 252, 25
+                             4, 255, 254, 252, 249, 244, 238, 231, 222, 213, 202, 191, 179, 167, 154, 141, 128, 114, 101
+                             , 88, 76, 64, 53, 42, 33, 24, 17, 11, 6, 3, 1, 0, 1, 3, 6, 11, 17, 24, 33, 42, 53, 64, 76, 88, 101, 114
+104F B3BFCAD5                
+1053 DEE7EEF4                
+1057 F9FCFEFF                
+105B FEFCF9F4                
+105F EEE7DED5                
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE    10
+
+1063 CABFB3A7                
+1067 9A8D8072                
+106B 65584C40                
+106F 352A2118                
+1073 110B0603                
+1077 01000103                
+107B 060B1118                
+107F 212A3540                
+1083 4C586572                
+                     518             
+                     519     
+                     520     END 
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE    11
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ADDRESS_CALC . . .  C ADDR   017AH   A   
+AGAIN. . . . . . .  C ADDR   0249H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+B1 . . . . . . . .  C ADDR   00D3H   A   
+B3 . . . . . . . .  C ADDR   00C1H   A   
+C1 . . . . . . . .  B ADDR   00B0H.3 A   
+C2 . . . . . . . .  B ADDR   00B0H.2 A   
+C3 . . . . . . . .  B ADDR   00B0H.1 A   
+C4 . . . . . . . .  B ADDR   00B0H.0 A   
+CHECK. . . . . . .  C ADDR   0023H   A   
+CHECK1 . . . . . .  C ADDR   0087H   A   
+CHECK2 . . . . . .  C ADDR   0092H   A   
+CHECK3 . . . . . .  C ADDR   009DH   A   
+CHECK_ROW. . . . .  C ADDR   01FCH   A   
+CLEAR_COMAND . . .  C ADDR   01D7H   A   
+CONT . . . . . . .  C ADDR   0042H   A   
+CONT1. . . . . . .  C ADDR   01DFH   A   
+CONT2. . . . . . .  C ADDR   0059H   A   
+CONT_CALC. . . . .  C ADDR   015FH   A   
+CONT_DIS . . . . .  C ADDR   028EH   A   
+DELAY. . . . . . .  C ADDR   0252H   A   
+E. . . . . . . . .  B ADDR   00A0H.2 A   
+ERROR. . . . . . .  C ADDR   00BAH   A   
+ERROR_MESG . . . .  C ADDR   040FH   A   
+FIND . . . . . . .  C ADDR   0247H   A   
+FREQ . . . . . . .  C ADDR   00F2H   A   
+FREQUANCY. . . . .  C ADDR   0195H   A   
+FREQ_RANGE_MESG. .  C ADDR   0417H   A   
+GO2. . . . . . . .  C ADDR   007BH   A   
+GO3. . . . . . . .  C ADDR   0082H   A   
+HERE1. . . . . . .  C ADDR   0136H   A   
+HERE2. . . . . . .  C ADDR   0142H   A   
+INITIAL. . . . . .  C ADDR   000FH   A   
+INITIAL_VALUE. . .  C ADDR   0109H   A   
+INVALID_MESG . . .  C ADDR   0185H   A   
+K1 . . . . . . . .  C ADDR   01E0H   A   
+K2 . . . . . . . .  C ADDR   01F1H   A   
+KEYPAD . . . . . .  D ADDR   00B0H   A   
+KHZ. . . . . . . .  C ADDR   00DEH   A   
+LCD_CLEAR. . . . .  C ADDR   026EH   A   
+LCD_COMM . . . . .  C ADDR   0275H   A   
+LCD_DATA . . . . .  C ADDR   0281H   A   
+LCD_INIT . . . . .  C ADDR   025BH   A   
+LCD_PORT . . . . .  D ADDR   0090H   A   
+LL . . . . . . . .  C ADDR   0254H   A   
+LL2. . . . . . . .  C ADDR   0256H   A   
+LOOP . . . . . . .  C ADDR   0171H   A   
+MAIN . . . . . . .  C ADDR   0017H   A   
+MATCH. . . . . . .  C ADDR   024FH   A   
+MESG_DESPLAY . . .  C ADDR   028EH   A   
+MSG2 . . . . . . .  C ADDR   040AH   A   
+MSG8 . . . . . . .  C ADDR   0425H   A   
+NEW_VALUE. . . . .  C ADDR   00E5H   A   
+NXT1 . . . . . . .  C ADDR   014BH   A   
+ONE. . . . . . . .  C ADDR   00A8H   A   
+OSC. . . . . . . .  B ADDR   00A0H.4 A   
+OUTPUT . . . . . .  C ADDR   0126H   A   
+OVER . . . . . . .  C ADDR   00CCH   A   
+OVER1. . . . . . .  C ADDR   0084H   A   
+OVERFLOW . . . . .  C ADDR   0400H   A   
+A51 MACRO ASSEMBLER  TEST_FUN                                                             03/18/2024 23:24:21 PAGE    12
+
+P0 . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+READ_FREQ. . . . .  C ADDR   01E0H   A   
+REMINDER . . . . .  N NUMB   0021H   A   
+RESULT . . . . . .  C ADDR   0065H   A   
+RETURN1. . . . . .  C ADDR   0029H   A   
+RETURN2. . . . . .  C ADDR   003AH   A   
+RETURN3. . . . . .  C ADDR   0051H   A   
+RO1. . . . . . . .  B ADDR   00B0H.7 A   
+RO2. . . . . . . .  B ADDR   00B0H.6 A   
+RO3. . . . . . . .  B ADDR   00B0H.5 A   
+RO4. . . . . . . .  B ADDR   00B0H.4 A   
+ROW1 . . . . . . .  C ADDR   0300H   A   
+ROW2 . . . . . . .  C ADDR   0304H   A   
+ROW3 . . . . . . .  C ADDR   0308H   A   
+ROW4 . . . . . . .  C ADDR   030CH   A   
+ROW_1. . . . . . .  C ADDR   0233H   A   
+ROW_2. . . . . . .  C ADDR   0238H   A   
+ROW_3. . . . . . .  C ADDR   023DH   A   
+ROW_4. . . . . . .  C ADDR   0242H   A   
+RS . . . . . . . .  B ADDR   00A0H.1 A   
+SAWTOOTH . . . . .  C ADDR   0434H   A   
+SAWTOOTH_LOOP. . .  C ADDR   0152H   A   
+SELECTED . . . . .  C ADDR   0446H   A   
+SELECTION_MSG. . .  C ADDR   019EH   A   
+SINE . . . . . . .  C ADDR   043FH   A   
+SINE_10K . . . . .  C ADDR   0FA0H   A   
+SINE_2K. . . . . .  C ADDR   104BH   A   
+SINE_3K. . . . . .  C ADDR   1023H   A   
+SINE_4K. . . . . .  C ADDR   1005H   A   
+SINE_5K. . . . . .  C ADDR   0FEDH   A   
+SINE_6K. . . . . .  C ADDR   0FD9H   A   
+SINE_7K. . . . . .  C ADDR   0FC8H   A   
+SINE_8K. . . . . .  C ADDR   0FB9H   A   
+SINE_9K. . . . . .  C ADDR   0FACH   A   
+SINE_LOOP. . . . .  C ADDR   016CH   A   
+SINE_WAVE. . . . .  C ADDR   0158H   A   
+SKIP . . . . . . .  C ADDR   0074H   A   
+SQUARE . . . . . .  C ADDR   042BH   A   
+SQUARE_LOOP. . . .  C ADDR   0131H   A   
+STOP_DIS . . . . .  C ADDR   0299H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TWO. . . . . . . .  C ADDR   00B1H   A   
+WAVE_OUT . . . . .  D ADDR   0080H   A   
+WAVE_SELECT. . . .  N NUMB   0010H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

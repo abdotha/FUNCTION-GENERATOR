@@ -1,0 +1,74 @@
+A51 MACRO ASSEMBLER  FUNCTIONS                                                            03/18/2024 23:23:48 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.7.0
+OBJECT MODULE PLACED IN .\Objects\FUNCTIONS.obj
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE FUNCTIONS.ASM SET(SMALL) DEBUG PRINT(.\Listings\FUNCTIONS.lst) OBJECT(.
+                      \Objects\FUNCTIONS.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     FREQ:               ;CONVERT DIGITS TO DECIMAL
+0000 75F064            2             MOV B,#100
+0003 EB                3             MOV A,R3         ;GET 1ST DIGIT 
+0004 A4                4             MUL AB               ;IF OVER FLOW WILL BE VALUE IN B  
+0005 FE                5             MOV R6,A
+0006 E5F0              6             MOV A,B
+0008                   7             CJNE A,#0,OVER            ;IF NOT EQUAL DISPLAT "TOO MUCH"
+*** ___________________________________________^
+*** ERROR #A45 IN 7 (FUNCTIONS.ASM, LINE 7): UNDEFINED SYMBOL (PASS-2)
+000B EC                8             MOV A,R4          ;GET 2ND DIGIT   
+000C 75F00A            9             MOV B,#10
+000F A4               10             MUL AB
+0010 C3               11             CLR C
+0011 2E               12             ADD A,R6
+0012                  13             JC OVER
+*** ____________________________________^
+*** ERROR #A45 IN 13 (FUNCTIONS.ASM, LINE 13): UNDEFINED SYMBOL (PASS-2)
+0014 2D               14             ADD A,R5
+0015 FE               15             MOV R6,A          ;SAVE FREQ IN DECIMAL IN R6
+0016 22               16     RET
+                      17     
+0017                  18     INITIAL_VALUE:
+0017 EE               19             MOV A,R6            ;GET DECIMAL FREQ
+0018 F5F0             20             MOV B,A
+001A 74FA             21             MOV A,#250
+001C 84               22             DIV AB
+001D                  23             MOV REMINDER,B           
+*** _____________________________________^
+*** ERROR #A45 IN 23 (FUNCTIONS.ASM, LINE 23): UNDEFINED SYMBOL (PASS-2)
+0020 75F002           24             MOV B,#2
+0023 A4               25             MUL AB
+0024 F8               26             MOV R0,A 
+0025                  27             MOV A,REMINDER
+*** _______________________________________^
+*** ERROR #A45 IN 27 (FUNCTIONS.ASM, LINE 27): UNDEFINED SYMBOL (PASS-2)
+0027 75F002           28             MOV B,#2
+002A A4               29             MUL AB             ;MUL REMINDER IN 2 --> IN THE EQUATION
+002B 8EF0             30             MOV B,R6
+002D 84               31             DIV AB             ;DIV RESULT INTO 2ND OPERAND --> FREQ
+002E 28               32             ADD A,R0 
+002F F4               33             CPL A
+0030 2404             34             ADD A,#4
+0032 FB               35             MOV R3,A           ;SAVE INITIAL VALUE IN R3
+0033 22               36     RET
+*** WARNING #A41 IN 36 (FUNCTIONS.ASM, LINE 36): MISSING 'END' STATEMENT
+A51 MACRO ASSEMBLER  FUNCTIONS                                                            03/18/2024 23:23:48 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+FREQ . . . . . . .  C ADDR   0000H   A   
+INITIAL_VALUE. . .  C ADDR   0017H   A   
+OVER . . . . . . .    ----   -----       
+REMINDER . . . . .    ----   -----       
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  1 WARNING(S), 4 ERROR(S)

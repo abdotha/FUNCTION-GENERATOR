@@ -1,0 +1,69 @@
+A51 MACRO ASSEMBLER  TEST                                                                 03/18/2024 03:01:34 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.7.0
+NO OBJECT MODULE REQUESTED
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE TEST.ASM SET(SMALL) DEBUG PRINT(.\Listings\TEST.lst) OBJECT(.\Objects\T
+                      EST.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00H
+0000 EE                2     MOV A,R6
+0001 F8                3     MOV R0,A 
+0002 7D0A              4     MOV R5,#10
+0004                   5     LABLES:
+0004 8DF0              6     MOV B,R5
+0006 B5F016            7     CJNE A,B,LABLE
+                       8     
+0009 8EF0              9     MOV B,R6
+000B 7478             10     MOV A,#120
+000D 84               11     DIV AB
+000E FA               12     MOV R2,A
+000F F509             13     MOV 9H,A 
+0011                  14     SINE_TEST:
+0011 AA09             15     MOV R2,9H  
+0013 900500           16     MOV DPTR,#500H
+0016                  17     LOOP:
+0016 EF               18     MOV A,R7
+0017 93               19     MOVC A,@ A+DPTR
+0018 F580             20     MOV P0,A 
+001A A3               21     INC DPTR 
+001B DAF9             22     DJNZ R2,LOOP 
+001D 80F2             23     SJMP SINE_TEST
+001F                  24     LABLE:
+001F 8DF0             25     MOV B,R5
+0021 7478             26     MOV A,#120
+0023 84               27     DIV AB
+0024 2F               28     ADD A,R7
+0025 FF               29     MOV R7,A 
+0026 EE               30     MOV A,R6 
+0027 1D               31     DEC R5
+0028                  32     SJMP LABLE S
+*** _________________________^
+*** ____________________________________^
+*** ERROR #A38 IN 32 (TEST.ASM, LINE 32): NUMBER OF OPERANDS DOES NOT MATCH INSTRUCTION
+*** ERROR #A9 IN 32 (TEST.ASM, LINE 32): SYNTAX ERROR
+                      33     
+                      34     END
+A51 MACRO ASSEMBLER  TEST                                                                 03/18/2024 03:01:34 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+LABLE. . . . . . .  C ADDR   001FH   A   
+LABLES . . . . . .  C ADDR   0004H   A   
+LOOP . . . . . . .  C ADDR   0016H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+S. . . . . . . . .    ----   -----       
+SINE_TEST. . . . .  C ADDR   0011H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 2 ERROR(S)

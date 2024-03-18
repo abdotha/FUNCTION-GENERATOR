@@ -1,0 +1,1 @@
+"Test_fun.asm" SET (SMALL) DEBUG PRINT(.\Listings\Test_fun.lst) OBJECT(.\Objects\Test_fun.obj) EP
